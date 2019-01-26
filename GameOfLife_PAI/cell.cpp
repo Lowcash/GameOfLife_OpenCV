@@ -4,6 +4,8 @@
 Cell::Cell(int pPositionX, int pPositionY) {
 	this->_positionX = pPositionX;
 	this->_positionY = pPositionY;
+
+	this->_isLife = false;
 }
 
 Cell::~Cell() {}

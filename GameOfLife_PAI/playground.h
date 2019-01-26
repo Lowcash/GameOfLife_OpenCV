@@ -23,8 +23,8 @@ class PlaygroundHelper {
 public:
 	static enum NeighborOnDirection { NORTH, EAST, SOUTH, WEST, NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST };
 
-	static Cell getCellFromPlayground(Playground pPlayground, int pPosition, int pPositionY);
-	static Cell getCellNeighborOnDirectionFromPlayground(Playground pPlayground, Cell pCell, NeighborOnDirection pNeighborOnDirection);
+	static Cell *getCellFromPlayground(Playground &pPlayground, int pPosition, int pPositionY);
+	static Cell *getCellNeighborOnDirectionFromPlayground(Playground &pPlayground, Cell pCell, NeighborOnDirection pNeighborOnDirection);
 };
 
 #endif // PLAYGROUND_H

@@ -36,28 +36,30 @@ void Playground::resetPlayground() {
 	}
 }
 
-Cell PlaygroundHelper::getCellFromPlayground(Playground pPlayground, int pPositionX, int pPositionY) {
-	return pPlayground.playgroundCells[(pPlayground.getWidth() * pPositionY) + pPositionX];
+Cell *PlaygroundHelper::getCellFromPlayground(Playground &pPlayground, int pPositionX, int pPositionY) {
+	return &pPlayground.playgroundCells[(pPlayground.getWidth() * pPositionY) + pPositionX];
 }
 
-Cell PlaygroundHelper::getCellNeighborOnDirectionFromPlayground(Playground pPlayground, Cell pCell, NeighborOnDirection pNeighborOnDirection) {
+Cell *PlaygroundHelper::getCellNeighborOnDirectionFromPlayground(Playground &pPlayground, Cell pCell, NeighborOnDirection pNeighborOnDirection) {
 	switch (pNeighborOnDirection)
 	{
 	case NeighborOnDirection::NORTH:
 		return getCellFromPlayground(pPlayground, pCell.getPositionX(), pCell.getPositionY() - 1);
 	case NeighborOnDirection::EAST:
-		return getCellFromPlayground(pPlayground, pCell.getPositionX() + 1, pCell.getPositionX());
+		return getCellFromPlayground(pPlayground, pCell.getPositionX() + 1, pCell.getPositionY());
 	case NeighborOnDirection::SOUTH:
-		return getCellFromPlayground(pPlayground, pCell.getPositionX(), pCell.getPositionX() + 1);
+		return getCellFromPlayground(pPlayground, pCell.getPositionX(), pCell.getPositionY() + 1);
 	case NeighborOnDirection::WEST:
-		return getCellFromPlayground(pPlayground, pCell.getPositionX() - 1, pCell.getPositionX());
+		return getCellFromPlayground(pPlayground, pCell.getPositionX() - 1, pCell.getPositionY());
 	case NeighborOnDirection::NORTH_WEST:
-		return getCellFromPlayground(pPlayground, pCell.getPositionX() - 1, pCell.getPositionX() - 1);
+		return getCellFromPlayground(pPlayground, pCell.getPositionX() - 1, pCell.getPositionY() - 1);
 	case NeighborOnDirection::NORTH_EAST:
-		return getCellFromPlayground(pPlayground, pCell.getPositionX() + 1, pCell.getPositionX() - 1);
+		return getCellFromPlayground(pPlayground, pCell.getPositionX() + 1, pCell.getPositionY() - 1);
 	case NeighborOnDirection::SOUTH_WEST:
-		return getCellFromPlayground(pPlayground, pCell.getPositionX() - 1, pCell.getPositionX() + 1);
+		return getCellFromPlayground(pPlayground, pCell.getPositionX() - 1, pCell.getPositionY() + 1);
 	case NeighborOnDirection::SOUTH_EAST:
-		return getCellFromPlayground(pPlayground, pCell.getPositionX() + 1, pCell.getPositionX() + 1);
+		return getCellFromPlayground(pPlayground, pCell.getPositionX() + 1, pCell.getPositionY() + 1);
 	}
+
+	return getCellFromPlayground(pPlayground, pCell.getPositionX() + 1, pCell.getPositionY() + 1);
 }
