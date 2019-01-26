@@ -1,21 +1,120 @@
-// GameOfLife_PAI.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include "pch.h"
-#include <iostream>
+#include "playground.h"
+#include "shapes.h"
+
+const int maxPlaygroundSize = 463;
+const int minPlaygroundSize = 10;
+const cv::Vec3f liveCellColor = cv::Vec3f(1, 1, 1);
+const cv::Vec3f deadCellColor = cv::Vec3f(0, 0, 0);
+
+Playground *mainPlayground = nullptr;
+Playground *temporaryPlayground = nullptr;
+
+cv::Mat mainPlaygroundImgSource;
+
+bool isSingleThreadRun = false;
+bool isParallelThreadRun = false;
+
+bool isGameRun = false;
+
+int numOfThreads = 1;
+
+int numOfCols = 10;
+int numOfRows = 10;
+
+int generationProbability = 10;
+
+std::string nameOfWindow = "GameOfLife";
+
+void initGame();
+void createNewGame();
+Playground *getPlayground(int pWidth, int pHeight);
+cv::Mat getPlaygroundImgSource(int pWidth, int pHeight);
+void generatePlayground(Playground &pPlayground);
+void playgroundToBitmap(Playground pPlayground, cv::Mat &pImgSource);
+cv::Vec3f getCellColor(Cell *pCell);
+void redraw(std::string nameOfWindow);
+void runGame();
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
+	initGame();
+
+	createNewGame();
+
+	cv::namedWindow(nameOfWindow);
+
+	redraw(nameOfWindow);
+
+	system("PAUSE");
+
+	mainPlayground = NULL;
+	temporaryPlayground = NULL;
+
+	delete mainPlayground;
+	delete temporaryPlayground;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+void initGame() { }
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+void createNewGame() {
+	mainPlayground = getPlayground(numOfCols, numOfRows);
+	temporaryPlayground = getPlayground(numOfCols, numOfRows);
+
+	mainPlaygroundImgSource = getPlaygroundImgSource(numOfCols, numOfRows);
+
+	generatePlayground(*mainPlayground);
+	playgroundToBitmap(*mainPlayground, mainPlaygroundImgSource);
+}
+
+Playground *getPlayground(int pWidth, int pHeight) {
+	return new Playground(pWidth, pHeight, minPlaygroundSize, maxPlaygroundSize);
+}
+
+cv::Mat getPlaygroundImgSource(int pWidth, int pHeight) {
+	return cv::Mat(cv::Size(pWidth, pHeight), CV_32FC3);
+}
+
+void generatePlayground(Playground &pPlayground) {
+	pPlayground.resetPlayground();
+	
+	for (int i = 0; i < pPlayground.playgroundCells.size(); i++) {
+		if ((rand() % 100) < generationProbability) {
+			Cell cell = pPlayground.playgroundCells[i];
+
+			switch (rand() % Shapes::NUM_OF_SHAPES) {
+			case (int)Shapes::BEACON: Shapes::setBeaconTo(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			case (int)Shapes::BEEHIVE: Shapes::setBeehiveTo(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			case (int)Shapes::BLINKER: Shapes::setBlinkerTo(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			case (int)Shapes::BLOCK: Shapes::setBlockTo(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			case (int)Shapes::BOAT: Shapes::setBoatTo(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			case (int)Shapes::GLIDER: Shapes::setGliderTo(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			case (int)Shapes::LOAF: Shapes::setLoafTo(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			case (int)Shapes::PULSAR: Shapes::setPulsar(cell.getPositionX(), cell.getPositionY(), pPlayground); break;
+			}
+		}
+	}
+}
+
+void playgroundToBitmap(Playground pPlayground, cv::Mat &pImgSource) {
+	for (int x = 0; x < pPlayground.getWidth(); x++) {
+		for (int y = 0; y < pPlayground.getHeight(); y++) {
+			pImgSource.at<cv::Vec3f>(x, y) = getCellColor(&PlaygroundHelper::getCellFromPlayground(pPlayground, x, y));
+		}
+	}
+}
+
+cv::Vec3f getCellColor(Cell *pCell) {
+	return pCell->isLife() ? liveCellColor : deadCellColor;
+}
+
+void redraw(std::string nameOfWindow) {
+	cv::Mat result;
+	cv::resize(mainPlaygroundImgSource, result, cv::Size(maxPlaygroundSize, maxPlaygroundSize));
+
+	cv::imshow(nameOfWindow, result);
+}
+
+void runGame() {
+
+}

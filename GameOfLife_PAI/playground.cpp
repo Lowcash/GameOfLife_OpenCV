@@ -21,17 +21,17 @@ int Playground::getHeight() {
 }
 
 void Playground::initCells(int pWidth, int pHeight) {
-	this->resetPlayground();
+	resetPlayground();
 
 	for (int y = 0; y < pHeight; y++) {
 		for (int x = 0; x < pWidth; x++) {
-			this->playgroundCells.push_back(Cell(x, y));
+			playgroundCells.push_back(Cell(x, y));
 		}
 	}
 }
 
 void Playground::resetPlayground() {
-	for (int i = 0; i < this->playgroundCells.size(); i++) {
+	for (int i = 0; i < playgroundCells.size(); i++) {
 		playgroundCells[i].setDead();
 	}
 }

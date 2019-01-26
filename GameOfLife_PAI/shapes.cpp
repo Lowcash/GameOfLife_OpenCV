@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "shapes.h"
 
 void Shapes::setBlinkerTo(int pPositionX, int pPositionY, Playground pPlayground) {
