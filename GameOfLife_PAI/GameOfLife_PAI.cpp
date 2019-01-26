@@ -2,7 +2,7 @@
 #include "playground.h"
 #include "shapes.h"
 
-const int maxPlaygroundSize = 463;
+const int maxPlaygroundSize = 500;
 const int minPlaygroundSize = 10;
 const cv::Vec3f liveCellColor = cv::Vec3f(1, 1, 1);
 const cv::Vec3f deadCellColor = cv::Vec3f(0, 0, 0);
@@ -12,21 +12,19 @@ Playground *temporaryPlayground = nullptr;
 
 cv::Mat mainPlaygroundImgSource;
 
-bool isSingleThreadRun = false;
-bool isParallelThreadRun = false;
-
-bool isGameRun = false;
-
 int numOfThreads = 1;
 
-int numOfCols = 200;
-int numOfRows = 200;
+const int numOfCols = maxPlaygroundSize;
+const int numOfRows = maxPlaygroundSize;
 
 int generationProbability = 1;
 
-std::string game = "GameOfLife";
+bool isThreadChanged = false;
 
-void initGame(std::string nameOfGame);
+const std::string game = "GameOfLife";
+const std::string threads = "Threads";
+
+void initGame(std::string nameOfGame, std::string nameOfThreadTrackbar);
 void createNewGame();
 Playground *getPlayground(int pWidth, int pHeight);
 cv::Mat getPlaygroundImgSource(int pWidth, int pHeight);
@@ -38,19 +36,26 @@ void runGame();
 int getNumCellNeighbors(Cell *pCell);
 void swapAndClearPlayground(Playground &pPlayground, Playground &pPlaygroundToSwap);
 
-int main()
-{
-	initGame(game);
+static void onThreadTrackbarChange(int, void*) {
+	omp_set_num_threads(numOfThreads);
+
+	isThreadChanged = true;
+}
+
+int main() {
+	initGame(game, threads);
 
 	createNewGame();
 
-	redraw(game);
+	printf("Starting game...............................\n");
 
-	while (true) {
+	while (cv::getWindowProperty(game, CV_WND_PROP_AUTOSIZE) != -1) {
 		runGame();
 	}
 
-	system("PAUSE");
+	printf("Ending game.................................\n");
+
+	//system("PAUSE");
 
 	mainPlayground = NULL;
 	temporaryPlayground = NULL;
@@ -59,11 +64,28 @@ int main()
 	delete temporaryPlayground;
 }
 
-void initGame(std::string nameOfGame) { 
+void initGame(std::string nameOfGame, std::string nameOfThreadTrackbar) { 
+	printf("-----------------GameOfLife-----------------\n");
+	printf("--------------------------------------------\n\n");
+
+	printf("Max num of thread: %d\n", omp_get_max_threads());
+	printf("--------------------------------------------\n\n");
+	printf("Game initialization...................");
+
 	cv::namedWindow(nameOfGame);
+	cv::createTrackbar(nameOfThreadTrackbar, nameOfGame, &numOfThreads, omp_get_max_threads(), onThreadTrackbarChange);
+	cv::setTrackbarMin(nameOfThreadTrackbar, nameOfGame, 1);
+	cv::setTrackbarMax(nameOfThreadTrackbar, nameOfGame, omp_get_max_threads());
+
+	omp_set_num_threads(numOfThreads);
+
+	printf("[DONE]\n\n");
 }
 
 void createNewGame() {
+	printf("--------------------------------------------\n");
+	printf("New game preparation..................");
+
 	mainPlayground = getPlayground(numOfCols, numOfRows);
 	temporaryPlayground = getPlayground(numOfCols, numOfRows);
 
@@ -71,6 +93,8 @@ void createNewGame() {
 
 	generatePlayground(*mainPlayground);
 	playgroundToBitmap(*mainPlayground, mainPlaygroundImgSource);
+
+	printf("[DONE]\n\n");
 }
 
 Playground *getPlayground(int pWidth, int pHeight) {
@@ -83,7 +107,8 @@ cv::Mat getPlaygroundImgSource(int pWidth, int pHeight) {
 
 void generatePlayground(Playground &pPlayground) {
 	pPlayground.resetPlayground();
-	
+
+#pragma omp parallel
 	for (int i = 0; i < pPlayground.playgroundCells.size(); i++) {
 		if ((rand() % 100) < generationProbability) {
 			Cell cell = pPlayground.playgroundCells[i];
@@ -103,6 +128,7 @@ void generatePlayground(Playground &pPlayground) {
 }
 
 void playgroundToBitmap(Playground pPlayground, cv::Mat &pImgSource) {
+#pragma omp parallel
 	for (int x = 0; x < pPlayground.getWidth(); x++) {
 		for (int y = 0; y < pPlayground.getHeight(); y++) {
 			pImgSource.at<cv::Vec3f>(x, y) = getCellColor(PlaygroundHelper::getCellFromPlayground(pPlayground, x, y));
@@ -120,10 +146,17 @@ void redraw(std::string nameOfWindow) {
 
 	cv::imshow(nameOfWindow, result);
 
-	cv::waitKey(0);
+	cv::waitKey(1);
 }
 
 void runGame() {
+#pragma omp parallel
+	if (isThreadChanged) {
+		printf("Num of threads: %d\n", omp_get_num_threads());
+
+		isThreadChanged = false;
+	}
+
 	for (int i = 0; i < mainPlayground->playgroundCells.size(); i++) {
 		Cell cell = mainPlayground->playgroundCells[i];
 
