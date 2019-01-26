@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "cell.h"
-
-Cell::Cell() { }
 
 Cell::Cell(int pPositionX, int pPositionY) {
 	this->_positionX = pPositionX;
@@ -10,7 +9,7 @@ Cell::Cell(int pPositionX, int pPositionY) {
 Cell::~Cell() {}
 
 bool Cell::isLife() {
-	return this->isLife;
+	return this->_isLife;
 }
 
 int Cell::getPositionX() {
@@ -18,5 +17,13 @@ int Cell::getPositionX() {
 }
 
 int Cell::getPositionY() {
-	return this->getPositionY;
+	return this->_positionY;
+}
+
+void Cell::setLife() {
+	this->_isLife = true;
+}
+
+void Cell::setDead() {
+	this->_isLife = false;
 }

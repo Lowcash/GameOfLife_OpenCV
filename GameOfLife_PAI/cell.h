@@ -3,7 +3,6 @@
 
 class Cell {
 public:
-	Cell();
 	Cell(int pPositionX, int pPositionY);
 
 	~Cell();
@@ -13,8 +12,10 @@ public:
 	int getPositionX();
 	int getPositionY();
 
+	void setLife();
+	void setDead();
 private:
-	bool _islife;
+	bool _isLife;
 
 	int _positionX, _positionY;
 };
